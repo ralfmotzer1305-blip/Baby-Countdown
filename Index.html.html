@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff7f2">
+<title>Countdown zum Mutterschutz ❤️</title>
+<style>
+:root{--bg:#fff8f4;--card:#ffffffcc;--text:#3b3035;--muted:#806f76;--accent:#d98d9e;--accent2:#eeb7a5;--green:#91b7a3}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);
+background:radial-gradient(circle at 15% 10%,#ffe5dd 0,transparent 30%),radial-gradient(circle at 90% 20%,#f8dfe7 0,transparent 28%),linear-gradient(160deg,#fffaf7,#fdf0ef);
+display:flex;justify-content:center;padding:24px 16px 40px}
+.wrap{width:min(620px,100%)}
+.hero{text-align:center;padding:24px 10px 16px}
+.baby{font-size:48px;filter:drop-shadow(0 5px 10px #d98d9e33)}
+h1{font-size:clamp(28px,8vw,43px);line-height:1.08;margin:10px 0 8px}
+.subtitle{color:var(--muted);font-size:17px;line-height:1.45}
+.card{background:var(--card);backdrop-filter:blur(10px);border:1px solid #ffffff;border-radius:26px;padding:22px;margin:14px 0;box-shadow:0 15px 40px #8d66701a}
+.big{text-align:center}
+.days{font-size:76px;font-weight:800;line-height:1;color:var(--accent);letter-spacing:-4px}
+.label{font-size:18px;font-weight:650;margin-top:6px}
+.timer{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:20px}
+.unit{background:#fff7f5;border-radius:16px;padding:12px 5px;text-align:center}
+.unit b{display:block;font-size:23px}.unit span{font-size:11px;color:var(--muted)}
+.work{text-align:center}
+.worknum{font-size:55px;font-weight:800;color:var(--green);line-height:1}
+.worktitle{font-size:19px;font-weight:700;margin-top:6px}
+.dates{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:16px}
+.pill{padding:8px 10px;border-radius:999px;background:#f5efed;font-size:12px;color:#6f6266}
+.pill.done{text-decoration:line-through;opacity:.4}
+.pill.today{outline:2px solid var(--green);font-weight:700}
+.progress-title{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:9px}
+.bar{height:13px;border-radius:99px;background:#f1e7e4;overflow:hidden}
+.fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--accent2),var(--accent));transition:width .7s ease}
+.note{text-align:center;font-size:17px;line-height:1.55}
+.note strong{color:var(--accent)}
+.footer{text-align:center;color:#9b898f;font-size:12px;padding:14px}
+.confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;display:none}
+@media(max-width:380px){.days{font-size:64px}.timer{gap:5px}.unit b{font-size:20px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <div class="baby">👶🏼🍼</div>
+    <h1>Endspurt zum Mutterschutz ❤️</h1>
+    <div class="subtitle">Bald heißt es: Laptop zu, Füße hoch<br>und Vorfreude aufs Baby. 🥰</div>
+  </section>
+
+  <section class="card big">
+    <div class="days" id="calendarDays">14</div>
+    <div class="label" id="calendarLabel">Tage bis zum letzten Tag</div>
+    <div class="timer">
+      <div class="unit"><b id="d">14</b><span>TAGE</span></div>
+      <div class="unit"><b id="h">14</b><span>STUNDEN</span></div>
+      <div class="unit"><b id="m">00</b><span>MINUTEN</span></div>
+      <div class="unit"><b id="s">00</b><span>SEKUNDEN</span></div>
+    </div>
+  </section>
+
+  <section class="card work">
+    <div class="worknum" id="workDays">6</div>
+    <div class="worktitle" id="workLabel">echte Arbeitstage noch 🥳</div>
+    <div class="dates" id="dates"><span class="pill">05.10.</span><span class="pill">06.10.</span><span class="pill">07.10.</span><span class="pill">12.10.</span><span class="pill">13.10.</span><span class="pill">15.10.</span></div>
+  </section>
+
+  <section class="card">
+    <div class="progress-title"><span>Endspurt</span><strong id="percent">0 % geschafft</strong></div>
+    <div class="bar"><div class="fill" id="fill" style="width:0%"></div></div>
+  </section>
+
+  <section class="card note" id="message">
+    Du hast es fast geschafft. ❤️<br>
+    Nur noch ein paar Mal arbeiten – dann beginnt ein ganz besonderer neuer Abschnitt. 👶🏼
+  </section>
+  <div class="footer">16. Oktober 2026 · letzter offizieller Tag ✨</div>
+</div>
+
+<script>
+const target = new Date(2026, 9, 17, 0, 0, 0); // Ende des 16.10.
+const start = new Date(2026, 9, 2, 0, 0, 0);
+const workDates = [
+  [2026,9,5],[2026,9,6],[2026,9,7],
+  [2026,9,12],[2026,9,13],[2026,9,15]
+].map(x=>new Date(x[0],x[1],x[2],0,0,0));
+
+const fmt = d => d.toLocaleDateString("de-DE",{day:"2-digit",month:"2-digit"});
+function dayStart(d){return new Date(d.getFullYear(),d.getMonth(),d.getDate())}
+
+function update(){
+  const now = new Date();
+  const today = dayStart(now);
+  const diff = Math.max(0, target-now);
+  const totalSec=Math.floor(diff/1000);
+  const days=Math.floor(totalSec/86400);
+  const hours=Math.floor((totalSec%86400)/3600);
+  const mins=Math.floor((totalSec%3600)/60);
+  const secs=totalSec%60;
+
+  document.getElementById("calendarDays").textContent=days;
+  document.getElementById("d").textContent=days;
+  document.getElementById("h").textContent=String(hours).padStart(2,"0");
+  document.getElementById("m").textContent=String(mins).padStart(2,"0");
+  document.getElementById("s").textContent=String(secs).padStart(2,"0");
+
+  const remaining = workDates.filter(d=>d>=today).length;
+  document.getElementById("workDays").textContent=remaining;
+  document.getElementById("workLabel").textContent =
+    remaining===1 ? "echter Arbeitstag noch! 🥳" : "echte Arbeitstage noch! 🥳";
+
+  const dates=document.getElementById("dates");
+  dates.innerHTML="";
+  workDates.forEach(d=>{
+    const p=document.createElement("span");
+    p.className="pill"+(d<today?" done":"")+(d.getTime()===today.getTime()?" today":"");
+    p.textContent=fmt(d);
+    dates.appendChild(p);
+  });
+
+  const total = target-start;
+  const elapsed = Math.min(total,Math.max(0,now-start));
+  const pct=Math.round(elapsed/total*100);
+  document.getElementById("fill").style.width=pct+"%";
+  document.getElementById("percent").textContent=pct+" % geschafft";
+
+  if(now>=target){
+    document.getElementById("calendarDays").textContent="🎉";
+    document.getElementById("calendarLabel").textContent="Geschafft – Mutterschutz! ❤️";
+    document.getElementById("workDays").textContent="0";
+    document.getElementById("workLabel").textContent="Arbeitstage. Laptop zu! 🥰";
+    document.getElementById("message").innerHTML="<strong>Geschafft! ❤️</strong><br>Ab jetzt beginnt die Babyzeit. 👶🏼🍼<br>Genieß jeden Moment!";
+  }
+}
+update(); setInterval(update,1000);
+</script>
+</body>
+</html>
